@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * @file
+ * Installation for flip.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function flip_schema() {
+  $schema = array();
+
+  $schema['flip'] = array(
+    'description' => 'Contains data for feature toggles',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'The flip ID.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'no null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'Friendly name of the feature toggle.',
+        'type' => 'varchar',
+        'length' => '256',
+      ),
+      'data' => array(
+        'description' => 'Feature toggle data information array.',
+        'type' => 'text',
+        'size' => 'small',
+      ),
+    ),
+    'primary key' => array('fid'),
+  );
+
+  return $schema;
+}

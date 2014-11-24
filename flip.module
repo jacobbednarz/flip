@@ -1,0 +1,129 @@
+<?php
+
+/**
+ * @file
+ * Module file for toggling features within the application.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function flip_menu() {
+  $items = array();
+
+  $items['admin/config/development/flip'] = array(
+    'title' => 'Flip',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('flip_configure_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'flip.admin.inc',
+    'file path' => drupal_get_path('module', 'flip') . '/admin',
+  );
+
+  return $items;
+}
+
+/**
+ * Check the status of a feature toggle.
+ *
+ * @return bool
+ *   TRUE if the feature toggle condition is met.
+ */
+function flip_enabled($toggle_name) {
+  $toggle_data = db_select('flip', 'f')
+    ->fields('f', array('data'))
+    ->condition('name', $toggle_name)
+    ->execute()
+    ->fetch();
+
+  // No match found.
+  if (empty($toggle_data)) {
+    return FALSE;
+  }
+
+  $toggle_data = unserialize($toggle_data->data);
+
+  // No condition is defined so it cannot be evaluated.
+  if (empty($toggle_data['condition'])) {
+    return FALSE;
+  }
+
+  // Providing the feature toggle is enabled, evaluate the condition and return
+  // the state.
+  $callback = $toggle_data['condition'];
+  if (variable_get("flip_{$name}_enabled")) {
+    return $callback();
+  }
+
+  return FALSE;
+}
+
+/**
+ * Get all the available feature toggles.
+ *
+ * @return array
+ *   Array of flip objects.
+ */
+function flip_get_all() {
+  return db_select('flip', 'f')
+    ->fields('f', array('name', 'data'))
+    ->execute()
+    ->fetchAllAssoc('name');
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function flip_flush_caches() {
+  // Find all the feature toggle info's and update the database.
+  foreach (module_implements('flip_info') as $module) {
+    $features = module_invoke($module, 'flip_info');
+
+    foreach ($features as $feature_name => $feature_info) {
+      $module_check = db_select('flip', 'f')
+        ->fields('f', array('name', 'data'))
+        ->condition('name', $feature_name)
+        ->execute()
+        ->fetch();
+
+      $data = array(
+        'name' => $feature_name,
+        'data' => serialize($feature_info),
+      );
+
+      // Check if we have an existing record and update it - otherwise, new
+      // entry.
+      if (empty($module_check)) {
+        db_insert('flip')
+          ->fields($data)
+          ->execute();
+      }
+      else {
+        db_update('flip')
+          ->fields($data)
+          ->condition('name', $feature_name)
+          ->execute();
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_flip_info().
+ */
+function flip_flip_info() {
+  return array(
+    'example_toggle' => array(
+      'name' => 'Example toggle',
+      'description' => 'This is my example description for a toggle.',
+      'condition' => 'my_example_callback3',
+    ),
+    'something' => 'else',
+    'not' => 'found',
+  );
+}
+
+function my_example_callback3() {
+  return TRUE;
+}
