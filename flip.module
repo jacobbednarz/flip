@@ -108,22 +108,3 @@ function flip_flush_caches() {
     }
   }
 }
-
-/**
- * Implements hook_flip_info().
- */
-function flip_flip_info() {
-  return array(
-    'example_toggle' => array(
-      'name' => 'Example toggle',
-      'description' => 'This is my example description for a toggle.',
-      'condition' => 'my_example_callback3',
-    ),
-    'something' => 'else',
-    'not' => 'found',
-  );
-}
-
-function my_example_callback3() {
-  return TRUE;
-}
