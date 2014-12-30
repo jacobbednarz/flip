@@ -42,6 +42,23 @@ Note: For a toggle to work, it must be marked as enabled in
 `admin/config/development/flip` **AND** the condition callback must return
 `TRUE`.
 
+To apply it conditionally within your code, you may have something similar to the following:
+
+```
+// Account for both outcomes. Handy for backwards compatibility.
+if (flip_enabled('example_toggle')) {
+  do_awesome_new_thing();
+}
+else {
+  use_old_functionality();
+}
+
+// Just do something new.
+if (flip_enabled('example_toggle')) {
+  do_awesome_new_thing();
+}
+```
+
 ### Example callbacks
 
 - Only during business hours
