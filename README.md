@@ -44,7 +44,7 @@ Note: For a toggle to work, it must be marked as enabled in
 
 To apply it conditionally within your code, you may have something similar to the following:
 
-```
+```php
 // Account for both outcomes. Handy for backwards compatibility.
 if (flip_enabled('example_toggle')) {
   do_awesome_new_thing();
@@ -63,7 +63,7 @@ if (flip_enabled('example_toggle')) {
 
 - Only during business hours
 
-```
+```php
 function flip_business_hours() {
   if (date('H') > 8 && date('H') < 16) {
     return TRUE;
