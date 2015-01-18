@@ -31,18 +31,19 @@ function flip_menu() {
  *   TRUE if the feature toggle condition is met.
  */
 function flip_enabled($toggle_name) {
-  $toggle_data = db_select('flip', 'f')
-    ->fields('f', array('data'))
+
+  $toggle = db_select('flip', 'f')
+    ->fields('f', array('data','name'))
     ->condition('name', $toggle_name)
     ->execute()
     ->fetch();
 
   // No match found.
-  if (empty($toggle_data)) {
+  if (empty($toggle)) {
     return FALSE;
   }
 
-  $toggle_data = unserialize($toggle_data->data);
+  $toggle_data = unserialize($toggle->data);
 
   // No condition is defined so it cannot be evaluated.
   if (empty($toggle_data['condition'])) {
@@ -52,7 +53,7 @@ function flip_enabled($toggle_name) {
   // Providing the feature toggle is enabled, evaluate the condition and return
   // the state.
   $callback = $toggle_data['condition'];
-  if (variable_get("flip_{$name}_enabled")) {
+  if (variable_get("flip_{$toggle->name}_enabled")) {
     return $callback();
   }
 
